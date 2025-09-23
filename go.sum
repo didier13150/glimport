@@ -1,0 +1,4 @@
+github.com/didier13150/gitlablib v0.1.0 h1:mfz9rciSMUpSS8oaZ1U1TFBW2vih4tRFAKVrXrHE+xM=
+github.com/didier13150/gitlablib v0.1.0/go.mod h1:J81mThJbL4tnCTwF9w6pmpGyEr/sSpyDlrHaMLGADnM=
+gopkg.in/ini.v1 v1.67.0 h1:Dgnx+6+nfE+IfzjUEISNeydPJh9AXNNsWbGP9KzCsOA=
+gopkg.in/ini.v1 v1.67.0/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
