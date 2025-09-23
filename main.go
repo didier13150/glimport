@@ -17,6 +17,7 @@ func main() {
 
 	var inputFile = flag.String("input", ".env", "File which contains vars to import.")
 	var outputFile = flag.String("output", ".gitlab-vars.new.json", "JSON output file which can be imported by glcli.")
+	var prefix = flag.String("prefix", "", "Prefix to apply to var name")
 	var verbose = flag.Bool("verbose", false, "Make application more talkative.")
 	var isCsv = flag.Bool("csv", false, "Input file is a CSV")
 
@@ -31,6 +32,13 @@ func main() {
 	flag.Parse()
 
 	vars := gitlablib.NewGitlabVar("", "", *verbose)
+
+	varfile, err := os.OpenFile(*outputFile, os.O_RDONLY, 0644)
+	if err == nil {
+		vars.ImportVars(*outputFile)
+		varfile.Close()
+	}
+
 	content, err := os.ReadFile(*inputFile)
 	if err != nil {
 		log.Fatal(err)
@@ -40,6 +48,9 @@ func main() {
 	if *isCsv {
 		//
 		r := csv.NewReader(strings.NewReader(string(content)))
+		r.Comma = ','
+		r.Comment = '#'
+
 		for {
 			data, err := r.Read()
 			if err == io.EOF {
@@ -49,7 +60,7 @@ func main() {
 				log.Fatal(err)
 			}
 			var newvar gitlablib.GitlabVarData
-			newvar.Key = data[0]
+			newvar.Key = *prefix + data[0]
 			newvar.Value = strings.ReplaceAll(data[1], "\\n", "\n")
 			if data[2] == "all" {
 				newvar.Env = "*"
@@ -61,7 +72,7 @@ func main() {
 			} else {
 				newvar.IsRaw = false
 			}
-			vars.GitlabData = append(vars.GitlabData, newvar)
+			vars.FileData = append(vars.FileData, newvar)
 		}
 	} else {
 		lines := strings.Split(string(content), "\n")
@@ -77,23 +88,23 @@ func main() {
 
 			data := strings.SplitN(line, "=", 2)
 			var newvar gitlablib.GitlabVarData
-			newvar.Key = data[0]
+			newvar.Key = *prefix + data[0]
 			newvar.Value = data[1]
 			newvar.Env = "*"
 			newvar.IsRaw = true
 
-			vars.GitlabData = append(vars.GitlabData, newvar)
+			vars.FileData = append(vars.FileData, newvar)
 		}
 	}
 
 	log.Printf("Export to %s", *outputFile)
-	json, err := json.MarshalIndent(vars.GitlabData, "", "  ")
+	json, err := json.MarshalIndent(vars.FileData, "", "  ")
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	if *verbose {
-		log.Printf("Try to write %s file", outputFile)
+		log.Printf("Try to write %s file", *outputFile)
 	}
 	err = os.WriteFile(*outputFile, json, 0644)
 	if err != nil {
