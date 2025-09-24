@@ -1,4 +1,4 @@
-module github.com/didier13150/gitlabimport
+module github.com/didier13150/glimport
 
 go 1.21.0
 
