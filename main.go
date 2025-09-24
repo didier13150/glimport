@@ -26,6 +26,7 @@ func main() {
 	}
 
 	flag.Usage = func() {
+		fmt.Print("Convert shell env file to glcli ready to import file\n\n")
 		fmt.Printf("Usage: " + os.Args[0] + " [options]\n")
 		flag.PrintDefaults()
 	}
