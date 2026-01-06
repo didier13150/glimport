@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/didier13150/gitlablib"
+	"github.com/didier13150/gllib"
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	}
 	flag.Parse()
 
-	vars := gitlablib.NewGitlabVar("", "", *verbose)
+	vars := gllib.NewGitlabVar("", "", *verbose)
 
 	varfile, err := os.OpenFile(*outputFile, os.O_RDONLY, 0644)
 	if err == nil {
@@ -60,7 +60,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			var newvar gitlablib.GitlabVarData
+			var newvar gllib.GitlabVarData
 			newvar.Key = *prefix + data[0]
 			newvar.Value = strings.ReplaceAll(data[1], "\\n", "\n")
 			if data[2] == "all" {
@@ -88,7 +88,7 @@ func main() {
 			log.Printf("Line: \"%s\"", line)
 
 			data := strings.SplitN(line, "=", 2)
-			var newvar gitlablib.GitlabVarData
+			var newvar gllib.GitlabVarData
 			newvar.Key = *prefix + data[0]
 			newvar.Value = data[1]
 			newvar.Env = "*"
