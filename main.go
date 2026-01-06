@@ -37,7 +37,10 @@ func main() {
 	varfile, err := os.OpenFile(*outputFile, os.O_RDONLY, 0644)
 	if err == nil {
 		vars.ImportVars(*outputFile)
-		varfile.Close()
+		err = varfile.Close()
+		if err != nil {
+			log.Fatalln("Cannot close var file")
+		}
 	}
 
 	content, err := os.ReadFile(*inputFile)
