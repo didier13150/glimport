@@ -19,28 +19,23 @@ test-src:
 
 
 .build-image:
-  image: docker.io/library/docker:dind
+  image: quay.io/buildah/stable:latest
   stage: build
-  services:
-    - name: docker:dind
-      alias: docker
   variables:
-    DOCKER_HOST: "tcp://docker:2376/"
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_TLS_VERIFY: 0
-    DOCKER_CERT_PATH: "${DOCKER_TLS_CERTDIR}/client"
-    DOCKER_DRIVER: overlay2
+    STORAGE_DRIVER: vfs
+    BUILDAH_FORMAT: docker
   before_script:
     - if [ ! -z "${DOCKER_REGISTRY_USER}" ] && [ ! -z "${DOCKER_REGISTRY_PASSWORD}" ] ;
       then
-        echo "${DOCKER_REGISTRY_PASSWORD}" | docker login -u ${DOCKER_REGISTRY_USER} --password-stdin ${DOCKER_REGISTRY} ;
+        buildah login -u "${DOCKER_REGISTRY_USER}" -p "${DOCKER_REGISTRY_PASSWORD}" "${DOCKER_REGISTRY}" ;
       fi
   script:
     # Build container
     - echo "Building ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}"
-    - docker build -t ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} -f Containerfile .
-    - docker tag ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:latest
-    - docker push --all-tags ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}
+    - buildah bud --storage-driver=${STORAGE_DRIVER} -t ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} -f Containerfile .
+    - buildah tag ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:latest
+    - buildah push --storage-driver=${STORAGE_DRIVER} ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}
+    - buildah push --storage-driver=${STORAGE_DRIVER} ${DOCKER_REGISTRY}/${REGISTRY_PATH}/${CI_PROJECT_NAME}:latest
 
 build-image-arm64v8:
   variables:
