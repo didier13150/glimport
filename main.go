@@ -63,6 +63,10 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+			if len(data) < 4 {
+				log.Printf("Line: %s", data)
+				continue
+			}
 			var newvar gllib.GitlabVarData
 			newvar.Key = *prefix + data[0]
 			newvar.Value = strings.ReplaceAll(data[1], "\\n", "\n")
